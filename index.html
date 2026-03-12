@@ -675,7 +675,19 @@ const RAW = [
   {cat:"Core",     channel:"CORE ORGANIC",           leads:3, booked:0, canceled:0, revenue:0,    completed:0},
 ];
 
-const TODAY=11, DAYS=31, ELAPSED=TODAY/DAYS;
+const now = new Date();
+
+  const TODAY = now.getDate(); // day of month today
+
+  const DAYS = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0
+  ).getDate(); // total days in current month
+
+  const ELAPSED = TODAY / DAYS;
+
+  
 const CC  = {Core:'#3d8ef8', Brand:'#e8302a', Referral:'#22c97b', GBL:'#f5a623'};
 const PP  = {Core:'pip-core', Brand:'pip-brand', Referral:'pip-referral', GBL:'pip-gbl'};
 const CATS = ['Brand','Core','Referral','GBL'];
