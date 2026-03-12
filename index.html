@@ -641,53 +641,13 @@
 
 <script>
 /* ── DATA ──────────────────────────────────────────────────── */
-const RAW = [
-  {cat:"Brand",    channel:"VIOC BRAND EMAIL",      leads:1, booked:0, canceled:0, revenue:0,    completed:0},
-  {cat:"Brand",    channel:"VIOC BRAND SMS",         leads:1, booked:0, canceled:0, revenue:0,    completed:0},
-  {cat:"Core",     channel:"CORE ORGANIC",           leads:1, booked:0, canceled:0, revenue:0,    completed:0},
-  {cat:"Core",     channel:"CORE ORGANIC",           leads:1, booked:0, canceled:0, revenue:0,    completed:0},
-  {cat:"Core",     channel:"CORE ORGANIC",           leads:1, booked:0, canceled:0, revenue:0,    completed:0},
-  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:28,booked:5, canceled:0, revenue:3534, completed:9},
-  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:19,booked:3, canceled:0, revenue:242,  completed:1},
-  {cat:"Core",     channel:"CORE OPS ENTERED LEAD",  leads:2, booked:1, canceled:0, revenue:242,  completed:1},
-  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:10,booked:1, canceled:0, revenue:0,    completed:0},
-  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:14,booked:8, canceled:1, revenue:1277, completed:2},
-  {cat:"Core",     channel:"CORE OPS ENTERED LEAD",  leads:3, booked:3, canceled:0, revenue:206,  completed:1},
-  {cat:"Brand",    channel:"VIOC BRAND EMAIL",       leads:5, booked:1, canceled:0, revenue:0,    completed:0},
-  {cat:"Core",     channel:"CORE OPS ENTERED LEAD",  leads:1, booked:1, canceled:0, revenue:0,    completed:0},
-  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:9, booked:1, canceled:0, revenue:1860, completed:2},
-  {cat:"Referral", channel:"VIOC REFERRAL",          leads:2, booked:2, canceled:0, revenue:1349, completed:2},
-  {cat:"GBL",      channel:"VIOC PAID GMB",          leads:1, booked:0, canceled:0, revenue:688,  completed:1},
-  {cat:"Referral", channel:"VIOC REFERRAL",          leads:2, booked:1, canceled:0, revenue:443,  completed:1},
-  {cat:"GBL",      channel:"VIOC GMB",               leads:9, booked:1, canceled:0, revenue:0,    completed:0},
-  {cat:"GBL",      channel:"VIOC PAID GMB",          leads:1, booked:0, canceled:0, revenue:991,  completed:2},
-  {cat:"Brand",    channel:"VIOC BRAND EMAIL",       leads:8, booked:2, canceled:0, revenue:79,   completed:1},
-  {cat:"Brand",    channel:"VIOC BRAND EMAIL",       leads:5, booked:0, canceled:0, revenue:0,    completed:0},
-  {cat:"Core",     channel:"CORE ORGANIC",           leads:3, booked:1, canceled:0, revenue:475,  completed:1},
-  {cat:"Core",     channel:"CORE OPS ENTERED LEAD",  leads:3, booked:0, canceled:0, revenue:0,    completed:0},
-  {cat:"GBL",      channel:"VIOC GMB",               leads:8, booked:0, canceled:0, revenue:0,    completed:0},
-  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:2, booked:2, canceled:0, revenue:2544, completed:5},
-  {cat:"Core",     channel:"CORE OPS ENTERED LEAD",  leads:3, booked:2, canceled:1, revenue:79,   completed:1},
-  {cat:"Core",     channel:"CORE EMAIL",             leads:0, booked:1, canceled:0, revenue:0,    completed:0},
-  {cat:"Brand",    channel:"VIOC BRAND SMS",         leads:1, booked:1, canceled:0, revenue:79,   completed:1},
-  {cat:"Core",     channel:"CORE OTHERS",            leads:0, booked:0, canceled:0, revenue:0,    completed:0},
-  {cat:"Core",     channel:"CORE SMS",               leads:1, booked:0, canceled:0, revenue:943,  completed:1},
-  {cat:"Core",     channel:"CORE ORGANIC",           leads:3, booked:0, canceled:0, revenue:0,    completed:0},
-];
+let RAW = [];
 
 const now = new Date();
+const TODAY = now.getDate();
+const DAYS = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+const ELAPSED = TODAY / DAYS;
 
-  const TODAY = now.getDate(); // day of month today
-
-  const DAYS = new Date(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    0
-  ).getDate(); // total days in current month
-
-  const ELAPSED = TODAY / DAYS;
-
-  
 const CC  = {Core:'#3d8ef8', Brand:'#e8302a', Referral:'#22c97b', GBL:'#f5a623'};
 const PP  = {Core:'pip-core', Brand:'pip-brand', Referral:'pip-referral', GBL:'pip-gbl'};
 const CATS = ['Brand','Core','Referral','GBL'];
@@ -698,7 +658,6 @@ function setFilter(f, btn){
   filter = f;
   document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
-  // sync cat-strip active state
   document.querySelectorAll('.cat-strip-cell').forEach(c=>{
     c.classList.toggle('active', c.dataset.cat===f);
   });
@@ -778,16 +737,19 @@ function render(){
     </div>`;
   }).join('');
 
-  /* table — grouped by category when showing all */
   const byCh={};
   d.forEach(r=>{
     if(!byCh[r.channel])byCh[r.channel]={cat:r.cat,leads:0,booked:0,canceled:0,revenue:0,completed:0};
-    const c=byCh[r.channel];c.leads+=r.leads;c.booked+=r.booked;c.canceled+=r.canceled;c.revenue+=r.revenue;c.completed+=r.completed;
+    const c=byCh[r.channel];
+    c.leads+=r.leads;
+    c.booked+=r.booked;
+    c.canceled+=r.canceled;
+    c.revenue+=r.revenue;
+    c.completed+=r.completed;
   });
 
   let rowsHTML = '';
   if(filter==='all'){
-    // Group rows by category in order: Brand, Core, Referral, GBL
     CATS.forEach(cat=>{
       const catEntries = Object.entries(byCh).filter(([,v])=>v.cat===cat).sort((a,b)=>b[1].leads-a[1].leads);
       if(!catEntries.length) return;
@@ -829,11 +791,16 @@ function render(){
 }
 
 function renderCharts(d){
-  Object.values(charts).forEach(c=>c.destroy()); charts={};
+  Object.values(charts).forEach(c=>c.destroy());
+  charts={};
 
   const cats={};
-  d.forEach(r=>{if(!cats[r.cat])cats[r.cat]={leads:0,rev:0};cats[r.cat].leads+=r.leads;cats[r.cat].rev+=r.revenue;});
-  // Use fixed order: Brand, Core, Referral, GBL — only include cats with data
+  d.forEach(r=>{
+    if(!cats[r.cat])cats[r.cat]={leads:0,rev:0};
+    cats[r.cat].leads+=r.leads;
+    cats[r.cat].rev+=r.revenue;
+  });
+
   const cl   = CATS.filter(c=>cats[c]);
   const cv   = cl.map(c=>cats[c].leads);
   const cr   = cl.map(c=>Math.round(cats[c].rev));
@@ -849,24 +816,26 @@ function renderCharts(d){
         titleFont:{family:'Barlow Condensed',size:12,weight:'700'},
         bodyFont:{family:'Barlow',size:11},
         callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} (${pct(ctx.raw,vals.reduce((a,b)=>a+b,0))}%)`}
-      }},animation:{duration:600}
+      }},
+      animation:{duration:600}
     }
   });
 
-  charts.leads  =new Chart(document.getElementById('chart-leads'),  dCfg(cl,cv,cols));
-  charts.revenue=new Chart(document.getElementById('chart-revenue'),dCfg(cl,cr,cols));
+  charts.leads   = new Chart(document.getElementById('chart-leads'), dCfg(cl,cv,cols));
+  charts.revenue = new Chart(document.getElementById('chart-revenue'), dCfg(cl,cr,cols));
 
   ['legend-leads','legend-revenue'].forEach(id=>{
     document.getElementById(id).innerHTML=cl.map((c,i)=>`
       <div class="legend-item"><div class="legend-dot" style="background:${cols[i]}"></div>${c}</div>`).join('');
   });
 
-  // Aggregate by category in Brand, GBL, Core, Referral order
   const CAT_ORDER = ['Brand','GBL','Core','Referral'];
   const byCat={};
   d.forEach(r=>{
     if(!byCat[r.cat])byCat[r.cat]={leads:0,booked:0,completed:0,cat:r.cat};
-    byCat[r.cat].leads+=r.leads; byCat[r.cat].booked+=r.booked; byCat[r.cat].completed+=r.completed;
+    byCat[r.cat].leads+=r.leads;
+    byCat[r.cat].booked+=r.booked;
+    byCat[r.cat].completed+=r.completed;
   });
   const catEnt = CAT_ORDER.filter(c=>byCat[c] && byCat[c].leads>0).map(c=>[c, byCat[c]]);
 
@@ -877,15 +846,20 @@ function renderCharts(d){
       datasets:[{
         data: ent.map(([,v])=>valFn(v)),
         backgroundColor: ent.map(([cat])=> CC[cat]||'#5c6478'),
-        borderRadius:5, borderSkipped:false
+        borderRadius:5,
+        borderSkipped:false
       }]
     },
     options:{
-      indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      indexAxis:'y',
+      responsive:true,
+      maintainAspectRatio:false,
       plugins:{
         legend:{display:false},
         tooltip:{
-          backgroundColor:'#1a1e26', borderColor:'#252b38', borderWidth:1,
+          backgroundColor:'#1a1e26',
+          borderColor:'#252b38',
+          borderWidth:1,
           titleFont:{family:'Barlow Condensed',size:12,weight:'700'},
           callbacks:{label:ctx=>` ${ctx.raw}%`}
         }
@@ -898,16 +872,50 @@ function renderCharts(d){
     }
   });
 
-  charts.booking = new Chart(document.getElementById('chart-booking'),
+  charts.booking = new Chart(
+    document.getElementById('chart-booking'),
     barChartOpts(catEnt, v=>parseFloat(pct(v.booked,v.leads)))
   );
 
-  charts.conversion = new Chart(document.getElementById('chart-conversion'),
+  charts.conversion = new Chart(
+    document.getElementById('chart-conversion'),
     barChartOpts(catEnt, v=>parseFloat(pct(v.completed,v.leads)))
   );
 }
 
-render();
+async function loadData() {
+  try {
+    const response = await fetch('./data.json');
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    RAW = await response.json();
+
+    RAW = RAW.map(r => ({
+      cat: r.cat || '',
+      channel: r.channel || '',
+      leads: Number(r.leads) || 0,
+      booked: Number(r.booked) || 0,
+      canceled: Number(r.canceled) || 0,
+      revenue: Number(r.revenue) || 0,
+      completed: Number(r.completed) || 0
+    }));
+
+    render();
+  } catch (error) {
+    console.error('Failed to load data.json:', error);
+    document.getElementById('channel-rows').innerHTML = `
+      <div class="tr">
+        <div class="td-name">Failed to load data.json</div>
+        <div class="td"></div>
+        <div class="td"></div>
+        <div class="td"></div>
+        <div class="td"></div>
+      </div>
+    `;
+  }
+}
+
+loadData();
 </script>
 </body>
 </html>
