@@ -649,8 +649,11 @@ const cstNow = new Date(
   new Date().toLocaleString("en-US", { timeZone: TZ })
 );
 
-const TODAY = cstNow.getDate();
-const DAYS = new Date(cstNow.getFullYear(), cstNow.getMonth() + 1, 0).getDate();
+const cstYesterday = new Date(cstNow);
+cstYesterday.setDate(cstYesterday.getDate() - 1);
+
+const TODAY = cstYesterday.getDate();
+const DAYS = new Date(cstYesterday.getFullYear(), cstYesterday.getMonth() + 1, 0).getDate();
 const ELAPSED = TODAY / DAYS;
 
 const CC  = {Core:'#3d8ef8', Brand:'#e8302a', Referral:'#22c97b', GBL:'#f5a623'};
