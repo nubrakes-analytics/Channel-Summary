@@ -1,0 +1,119 @@
+[
+  {
+    "cat": "Brand",
+    "channel": "VIOC BRAND EMAIL",
+    "leads": 97,
+    "booked": 16,
+    "canceled": 0,
+    "revenue": 3530,
+    "completed": 8
+  },
+  {
+    "cat": "Brand",
+    "channel": "VIOC BRAND SMS",
+    "leads": 15,
+    "booked": 8,
+    "canceled": 0,
+    "revenue": 1847,
+    "completed": 6
+  },
+  {
+    "cat": "Core",
+    "channel": "CORE EMAIL",
+    "leads": 90,
+    "booked": 34,
+    "canceled": 4,
+    "revenue": 15499,
+    "completed": 32
+  },
+  {
+    "cat": "Core",
+    "channel": "CORE GMB",
+    "leads": 107,
+    "booked": 24,
+    "canceled": 6,
+    "revenue": 7827,
+    "completed": 17
+  },
+  {
+    "cat": "Core",
+    "channel": "CORE GMB PAID ADS",
+    "leads": 1,
+    "booked": 1,
+    "canceled": 1,
+    "revenue": 525,
+    "completed": 1
+  },
+  {
+    "cat": "Core",
+    "channel": "CORE GOOGLE ADS",
+    "leads": 1364,
+    "booked": 320,
+    "canceled": 51,
+    "revenue": 149608,
+    "completed": 279
+  },
+  {
+    "cat": "Core",
+    "channel": "CORE OPS ENTERED LEAD",
+    "leads": 273,
+    "booked": 91,
+    "canceled": 14,
+    "revenue": 36016,
+    "completed": 73
+  },
+  {
+    "cat": "Core",
+    "channel": "CORE ORGANIC",
+    "leads": 158,
+    "booked": 56,
+    "canceled": 4,
+    "revenue": 28161,
+    "completed": 45
+  },
+  {
+    "cat": "Core",
+    "channel": "CORE OTHERS",
+    "leads": 9,
+    "booked": 16,
+    "canceled": 1,
+    "revenue": 5394,
+    "completed": 14
+  },
+  {
+    "cat": "Core",
+    "channel": "CORE SMS",
+    "leads": 21,
+    "booked": 13,
+    "canceled": 3,
+    "revenue": 6225,
+    "completed": 13
+  },
+  {
+    "cat": "GBL",
+    "channel": "VIOC GMB",
+    "leads": 293,
+    "booked": 56,
+    "canceled": 8,
+    "revenue": 18879,
+    "completed": 35
+  },
+  {
+    "cat": "GBL",
+    "channel": "VIOC PAID GMB",
+    "leads": 34,
+    "booked": 13,
+    "canceled": 2,
+    "revenue": 4847,
+    "completed": 11
+  },
+  {
+    "cat": "Referral",
+    "channel": "VIOC REFERRAL",
+    "leads": 123,
+    "booked": 76,
+    "canceled": 19,
+    "revenue": 13540,
+    "completed": 25
+  }
+]
