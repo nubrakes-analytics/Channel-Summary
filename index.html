@@ -266,7 +266,6 @@
   .legend-item { display:flex; align-items:center; gap:6px; font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:600; color:var(--muted2); letter-spacing:0.04em; }
   .legend-dot  { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
 
-  /* ── BOTTOM NAV ── */
   .bnav {
     position:fixed; bottom:0; left:0; right:0;
     background:var(--surface); border-top:1px solid var(--border);
@@ -278,6 +277,154 @@
   .bnav-icon { font-size:18px; line-height:1; }
   .bnav-lbl  { font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
   .bnav-item.active .bnav-lbl { color:var(--red); }
+  /* Desktop-only elements hidden on mobile by default */
+  .desktop-nav { display:none; }
+  .desktop-two-col { display:contents; }
+     RESPONSIVE — SMALL MOBILE (< 380px)
+  ══════════════════════════════════════════ */
+  @media (max-width: 380px) {
+    .main { padding:10px 8px 80px; }
+    .hdr  { padding:0 10px; height:52px; }
+    .nb-logo { height:24px; }
+    .hdr-title { font-size:12px; }
+    .hdr-month { font-size:10px; padding:2px 7px; }
+    .hdr-updated { display:none; }
+    .cat-nav { padding:0 8px; gap:3px; height:40px; }
+    .cat-tab { font-size:10px; padding:0 9px; height:24px; gap:4px; }
+    .cat-tab-dot { width:5px; height:5px; }
+    .cat-strip-cell { padding:7px 6px 6px; }
+    .csc-leads { font-size:15px; }
+    .csc-sub   { font-size:8px; }
+    .hero-val  { font-size:24px; }
+    .hero-cell { padding:10px 8px 10px; }
+    .rate-val  { font-size:17px; }
+    .rate-cell { padding:9px 5px; }
+    .rate-lbl  { font-size:8px; }
+    .tbl-head,
+    .tr,
+    .tbl-totals { grid-template-columns:1fr 40px 40px 40px 54px; padding:7px 8px; }
+    .td { font-size:11px; }
+    .td-name { font-size:11px; gap:5px; }
+    .th { font-size:8px; }
+    .pace-name { width:60px; font-size:9px; }
+    .pace-proj  { font-size:9px; width:42px; }
+    .charts-pair { gap:6px; }
+  }
+
+  /* ══════════════════════════════════════════
+     RESPONSIVE — TABLET (≥ 600px)
+  ══════════════════════════════════════════ */
+  @media (min-width: 600px) {
+    .main { padding:16px 20px 90px; max-width:960px; }
+    .hdr  { padding:0 20px; height:62px; }
+    .nb-logo { height:34px; }
+    .hdr-title { font-size:16px; }
+    .hdr-month { font-size:13px; }
+    .cat-nav { padding:0 20px; height:48px; gap:6px; }
+    .cat-tab  { font-size:13px; height:30px; padding:0 16px; }
+    .cat-strip-cell { padding:12px 14px 11px; }
+    .csc-leads { font-size:24px; }
+    .csc-sub   { font-size:10px; }
+    .hero-val  { font-size:36px; }
+    .hero-cell { padding:16px 14px 14px; }
+    .rate-val  { font-size:24px; }
+    .rate-cell { padding:15px 10px; }
+    .rate-lbl  { font-size:10px; }
+    .tbl-head,
+    .tr,
+    .tbl-totals { grid-template-columns:1fr 68px 68px 68px 88px; padding:10px 14px; }
+    .td { font-size:14px; }
+    .td-name { font-size:13px; }
+    .th { font-size:10px; }
+    .pace-name { width:88px; font-size:12px; }
+    .pace-proj  { font-size:11px; width:62px; }
+    .pace-row  { gap:12px; margin-bottom:11px; }
+    .charts-pair { gap:12px; }
+  }
+
+  /* ══════════════════════════════════════════
+     RESPONSIVE — DESKTOP (≥ 1024px)
+  ══════════════════════════════════════════ */
+  @media (min-width: 1024px) {
+    .main { padding:24px 32px 40px; max-width:1360px; }
+    .hdr  { height:68px; padding:0 32px; }
+    .nb-logo { height:38px; }
+    .hdr-title { font-size:18px; }
+    .hdr-month { font-size:14px; padding:4px 14px 3px; }
+    .hdr-updated { font-size:11px; }
+
+    /* Desktop nav in header, bottom nav hidden */
+    .bnav { display:none; }
+    .desktop-nav { display:flex !important; }
+
+    .cat-nav { height:54px; padding:0 32px; gap:8px; }
+    .cat-tab  { font-size:13px; height:34px; padding:0 18px; gap:8px; }
+    .cat-tab-dot { width:8px; height:8px; }
+
+    .cat-strip-cell { padding:16px 20px 14px; }
+    .csc-name  { font-size:10px; margin-bottom:7px; }
+    .csc-leads { font-size:32px; }
+    .csc-sub   { font-size:11px; margin-top:5px; }
+
+    .sec-lbl { font-size:11px; letter-spacing:0.18em; }
+
+    .hero-val  { font-size:44px; }
+    .hero-lbl  { font-size:11px; letter-spacing:0.16em; }
+    .hero-sub  { font-size:12px; }
+    .hero-cell { padding:22px 20px 18px; }
+    .hero-rev  { padding:20px 22px 22px; }
+    .hero-rev-val  { font-size:38px; }
+    .hero-rev-proj { font-size:24px; }
+
+    .canceled-strip { padding:18px 24px; }
+    .cs-val { font-size:38px; }
+    .cs-proj-val { font-size:22px; }
+
+    .rate-cell { padding:20px 16px; }
+    .rate-val  { font-size:32px; }
+    .rate-lbl  { font-size:11px; margin-bottom:9px; }
+
+    .pacing-card { padding:22px 24px; }
+    .pacing-title { font-size:13px; }
+    .pace-name  { width:108px; font-size:13px; }
+    .pace-track { height:7px; }
+    .pace-proj  { font-size:12px; width:74px; }
+    .pace-row   { gap:14px; margin-bottom:13px; }
+
+    .tbl-head,
+    .tr,
+    .tbl-totals { grid-template-columns:1fr 84px 84px 84px 114px; padding:11px 20px; }
+    .th { font-size:10px; }
+    .td { font-size:15px; }
+    .td-name { font-size:14px; gap:10px; }
+    .cat-pip { width:7px; height:7px; }
+    .totals-lbl { font-size:13px; }
+    .totals-val { font-size:15px; }
+    .tbl-cat-header { padding:9px 20px 7px; font-size:10px; }
+
+    /* Two-column desktop layout: hero+canceled+rates left, pacing+table right */
+    .desktop-two-col {
+      display:grid !important;
+      grid-template-columns:1fr 1fr;
+      gap:20px;
+      align-items:start;
+    }
+    .charts-pair { gap:16px; }
+    .chart-card { padding:16px 14px 13px; }
+    .chart-full { padding:18px; }
+    .chart-ttl  { font-size:11px; margin-bottom:12px; }
+    .chart-ttl-badge { font-size:10px; padding:4px 10px; }
+    .legend-item { font-size:11px; }
+  }
+
+  /* ══════════════════════════════════════════
+     RESPONSIVE — WIDE DESKTOP (≥ 1280px)
+  ══════════════════════════════════════════ */
+  @media (min-width: 1280px) {
+    .main { padding:28px 48px 40px; }
+    .hdr  { padding:0 48px; }
+    .cat-nav { padding:0 48px; }
+  }
 </style>
 </head>
 <body>
@@ -290,6 +437,12 @@
     <span class="hdr-title">Channel Summary</span>
   </div>
   <div class="hdr-right">
+    <div class="desktop-nav">
+      <div class="desktop-nav-item active">📊 Summary</div>
+      <div class="desktop-nav-item">📍 Markets</div>
+      <div class="desktop-nav-item">🔧 Channels</div>
+      <div class="desktop-nav-item">📅 Daily</div>
+    </div>
     <span class="hdr-month">March 2026</span>
     <span class="hdr-updated">Data refreshes daily &nbsp;·&nbsp; Last updated: Mar 11</span>
   </div>
@@ -320,6 +473,10 @@
 <!-- MAIN -->
 <main class="main">
 
+  <!-- DESKTOP TWO-COL GRID START -->
+  <div class="desktop-two-col">
+  <!-- LEFT COL -->
+  <div>
   <!-- MTD OVERVIEW -->
   <div class="sec"><span class="sec-lbl">MTD Overview</span><div class="sec-line"></div></div>
 
@@ -396,6 +553,9 @@
     </div>
   </div>
 
+  </div><!-- end left col -->
+  <!-- RIGHT COL -->
+  <div>
   <!-- PACING -->
   <div class="sec"><span class="sec-lbl">Month Pacing</span><div class="sec-line"></div></div>
   <div class="pacing-card">
@@ -419,6 +579,9 @@
     <div id="channel-rows"></div>
     <div class="tbl-totals" id="totals-row"></div>
   </div>
+
+  </div><!-- end right col -->
+  </div><!-- end desktop-two-col -->
 
   <!-- CHARTS PAIR -->
   <div class="sec"><span class="sec-lbl">Leads &amp; Revenue by Category</span><div class="sec-line"></div></div>
