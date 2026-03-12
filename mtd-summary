@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NuBrakes | Channel Summary</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg:       #0d0f12;
+    --surface:  #13161b;
+    --surface2: #1a1e26;
+    --surface3: #1f2430;
+    --border:   #252b38;
+    --border2:  #2e3545;
+    --red:      #e8302a;
+    --red-dim:  rgba(232,48,42,0.12);
+    --orange:   #ff6b35;
+    --gold:     #f5a623;
+    --green:    #22c97b;
+    --blue:     #3d8ef8;
+    --text:     #edf0f5;
+    --text2:    #a8b0bf;
+    --muted:    #5c6478;
+    --muted2:   #7a8498;
+    --r:        8px;
+    --r-sm:     5px;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; font-size:14px; min-height:100vh; }
+
+  /* ── HEADER ── */
+  .hdr {
+    background:var(--surface);
+    border-bottom:3px solid var(--red);
+    padding:0 16px;
+    height:60px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:200;
+    box-shadow:0 4px 28px rgba(0,0,0,0.55);
+  }
+  .hdr-left { display:flex; align-items:center; gap:12px; }
+  .nb-logo  { height:32px; display:block; }
+  .hdr-divider { width:1px; height:24px; background:var(--border2); }
+  .hdr-title {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:15px; font-weight:700; letter-spacing:0.08em;
+    text-transform:uppercase; color:var(--text2);
+  }
+  .hdr-right { display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+  .hdr-month {
+    background:var(--red); color:#fff;
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:12px; font-weight:800; letter-spacing:0.1em;
+    text-transform:uppercase; padding:3px 10px 2px;
+    border-radius:3px; line-height:1.4;
+  }
+  .hdr-updated { font-size:9.5px; color:var(--muted); letter-spacing:0.04em; font-weight:500; }
+
+  /* ── CATEGORY NAV ── */
+  .cat-nav {
+    background:var(--surface2); border-bottom:1px solid var(--border);
+    padding:0 12px; height:46px;
+    display:flex; align-items:center; gap:4px;
+    overflow-x:auto; scrollbar-width:none;
+  }
+  .cat-nav::-webkit-scrollbar { display:none; }
+  .cat-tab {
+    background:transparent; border:1px solid var(--border);
+    color:var(--muted2);
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:12px; font-weight:800; letter-spacing:0.08em;
+    text-transform:uppercase; padding:0 13px;
+    border-radius:20px; cursor:pointer;
+    white-space:nowrap; transition:all .18s; height:28px;
+    display:flex; align-items:center; gap:6px;
+  }
+  .cat-tab-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; opacity:0.5; transition:opacity .18s; }
+  .cat-tab.active { border-color:transparent; color:#fff; }
+  .cat-tab.active .cat-tab-dot { opacity:1; }
+  .cat-tab[data-cat="all"].active    { background:var(--surface3); color:var(--text); border-color:var(--border2); }
+  .cat-tab[data-cat="Brand"].active  { background:rgba(232,48,42,0.18);  border-color:rgba(232,48,42,0.5);  color:#ff6b6b; }
+  .cat-tab[data-cat="Core"].active   { background:rgba(61,142,248,0.18); border-color:rgba(61,142,248,0.5); color:#7ab8ff; }
+  .cat-tab[data-cat="Referral"].active { background:rgba(34,201,123,0.18); border-color:rgba(34,201,123,0.5); color:#5de8a8; }
+  .cat-tab[data-cat="GBL"].active    { background:rgba(245,166,35,0.18); border-color:rgba(245,166,35,0.5); color:#ffc85c; }
+  .cat-tab:hover:not(.active) { background:var(--surface3); color:var(--text); border-color:var(--border2); }
+
+  /* ── CATEGORY SUMMARY STRIP ── */
+  .cat-strip {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    border-bottom:2px solid var(--border);
+    background:var(--surface);
+  }
+  .cat-strip-cell {
+    padding:10px 10px 9px;
+    border-right:1px solid var(--border);
+    cursor:pointer; transition:background .15s;
+    position:relative;
+  }
+  .cat-strip-cell:last-child { border-right:none; }
+  .cat-strip-cell:hover { background:var(--surface2); }
+  .cat-strip-cell.active { background:var(--surface2); }
+  .cat-strip-cell::after {
+    content:''; position:absolute; bottom:-2px; left:0; right:0;
+    height:2px; background:transparent; transition:background .18s;
+  }
+  .cat-strip-cell.active::after { background:var(--accent-cat,#a8b0bf); }
+  .csc-name {
+    font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:800;
+    letter-spacing:0.12em; text-transform:uppercase;
+    display:flex; align-items:center; gap:5px; margin-bottom:4px;
+  }
+  .csc-dot { width:5px; height:5px; border-radius:50%; }
+  .csc-leads { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:900; line-height:1; }
+  .csc-sub { font-size:9px; color:var(--muted); margin-top:3px; font-weight:500; }
+
+  /* ── MAIN ── */
+  .main { padding:14px 12px 90px; max-width:640px; margin:0 auto; }
+
+  /* ── SECTION HEADING ── */
+  .sec { display:flex; align-items:center; gap:8px; margin:20px 0 9px; }
+  .sec-line { flex:1; height:1px; background:var(--border); }
+  .sec-lbl {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:10px; font-weight:800; letter-spacing:0.16em;
+    text-transform:uppercase; color:var(--muted); white-space:nowrap;
+  }
+
+  /* ── HERO CARD ── */
+  .hero {
+    background:var(--surface); border:1px solid var(--border);
+    border-top:3px solid var(--red); border-radius:var(--r); overflow:hidden;
+  }
+  .hero-grid { display:grid; grid-template-columns:repeat(3,1fr); border-bottom:1px solid var(--border); }
+  .hero-cell {
+    padding:14px 12px 13px; border-right:1px solid var(--border);
+    position:relative; overflow:hidden;
+  }
+  .hero-cell:last-child { border-right:none; }
+  .hero-lbl {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:9px; font-weight:800; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:5px;
+  }
+  .hero-val {
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:32px; font-weight:900; line-height:1; color:var(--text);
+  }
+  .hero-val.blue  { color:var(--blue); }
+  .hero-val.green { color:var(--green); }
+  .hero-val.gold  { color:var(--gold); }
+  .hero-val.sm    { font-size:22px; }
+  .hero-sub { font-size:10px; color:var(--muted2); margin-top:5px; font-weight:500; }
+  .hero-sub span  { color:var(--muted); font-weight:400; }
+  .micro-bar { position:absolute; bottom:0; left:0; right:0; height:2px; background:var(--border); }
+  .micro-fill { height:100%; transition:width 1s cubic-bezier(.22,.61,.36,1); }
+
+  /* ── REVENUE FOOTER ── */
+  .hero-rev { padding:14px 14px 15px; }
+  .hero-rev-row { display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:12px; }
+  .hero-rev-lbl { font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:4px; }
+  .hero-rev-val { font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:900; color:var(--gold); line-height:1; }
+  .hero-rev-proj { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:800; color:var(--text2); }
+  .progress-lbl { display:flex; justify-content:space-between; margin-bottom:5px; }
+  .progress-lbl span { font-size:9px; color:var(--muted); font-weight:600; letter-spacing:0.1em; text-transform:uppercase; }
+  .progress-lbl em { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700; color:var(--muted2); font-style:normal; }
+  .prog-track { height:6px; background:var(--surface3); border-radius:3px; overflow:hidden; }
+  .prog-fill  { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--red),var(--orange)); transition:width 1s cubic-bezier(.22,.61,.36,1); }
+
+  /* ── CANCELED STRIP ── */
+  .canceled-strip {
+    background:var(--surface); border:1px solid var(--border);
+    border-left:3px solid var(--orange); border-radius:var(--r);
+    padding:12px 15px; display:flex; align-items:center; justify-content:space-between;
+    margin-top:8px;
+  }
+  .cs-lbl { font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+  .cs-val { font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:900; color:var(--orange); line-height:1; }
+  .cs-proj-lbl { font-size:9px; color:var(--muted); font-weight:500; margin-bottom:2px; text-align:right; }
+  .cs-proj-val { font-family:'Barlow Condensed',sans-serif; font-size:16px; font-weight:800; color:var(--text2); text-align:right; }
+
+  /* ── RATES ── */
+  .rates {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:var(--r); overflow:hidden;
+  }
+  .rate-cell { padding:13px 8px; border-right:1px solid var(--border); text-align:center; }
+  .rate-cell:last-child { border-right:none; }
+  .rate-lbl {
+    font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:800;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--muted);
+    margin-bottom:6px; line-height:1.3;
+  }
+  .rate-val { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:900; color:var(--text); }
+  .rate-val.good   { color:var(--green); }
+  .rate-val.warn   { color:var(--gold); }
+  .rate-val.danger { color:var(--red); }
+
+  /* ── PACING CARD ── */
+  .pacing-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:14px; }
+  .pacing-hdr  { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+  .pacing-title { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--text2); }
+  .day-badge {
+    background:var(--surface3); border:1px solid var(--border2);
+    border-radius:3px; padding:2px 8px;
+    font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:700;
+    letter-spacing:0.06em; color:var(--muted2);
+  }
+  .pace-row { display:flex; align-items:center; gap:10px; margin-bottom:9px; }
+  .pace-row:last-child { margin-bottom:0; }
+  .pace-name { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; color:var(--text2); width:76px; flex-shrink:0; }
+  .pace-track { flex:1; height:5px; background:var(--surface3); border-radius:3px; overflow:hidden; position:relative; }
+  .pace-fill  { height:100%; border-radius:3px; transition:width 1s cubic-bezier(.22,.61,.36,1); }
+  .pace-marker { position:absolute; top:-2px; width:2px; height:9px; background:var(--border2); border-radius:1px; }
+  .pace-pct  { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:800; width:32px; text-align:right; flex-shrink:0; }
+  .pace-proj { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:600; color:var(--muted); width:54px; text-align:right; flex-shrink:0; }
+
+  /* ── CHANNEL TABLE ── */
+  .tbl-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); overflow:hidden; }
+  .tbl-head { display:grid; grid-template-columns:1fr 52px 52px 52px 68px; padding:8px 12px; background:var(--surface2); border-bottom:1px solid var(--border); }
+  .th { font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:800; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); text-align:right; }
+  .th:first-child { text-align:left; }
+  .tr { display:grid; grid-template-columns:1fr 52px 52px 52px 68px; padding:9px 12px; border-bottom:1px solid var(--border); transition:background .1s; }
+  .tr:last-child { border-bottom:none; }
+  .tr:hover { background:rgba(255,255,255,0.025); }
+  .td-name { font-family:'Barlow Condensed',sans-serif; font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:7px; color:var(--text); }
+  .cat-pip { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+  .pip-core     { background:var(--blue); }
+  .pip-brand    { background:var(--red); }
+  .pip-referral { background:var(--green); }
+  .pip-gbl      { background:var(--gold); }
+  .td { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:700; text-align:right; color:var(--muted2); display:flex; align-items:center; justify-content:flex-end; }
+  .td.hi    { color:var(--text); }
+  .td.green { color:var(--green); }
+  .td.gold  { color:var(--gold); }
+  .tbl-cat-header {
+    display:flex; align-items:center; gap:7px;
+    padding:7px 12px 5px;
+    background:var(--surface2);
+    border-bottom:1px solid var(--border);
+    font-family:'Barlow Condensed',sans-serif;
+    font-size:9px; font-weight:900; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--cat-col,var(--muted));
+    border-left:2px solid var(--cat-col,var(--border));
+  }
+  .tbl-cat-header:first-child { border-top:none; }
+  .tbl-totals { display:grid; grid-template-columns:1fr 52px 52px 52px 68px; padding:9px 12px; background:var(--red-dim); border-top:1px solid rgba(232,48,42,0.25); }
+  .totals-lbl { font-family:'Barlow Condensed',sans-serif; font-size:11px; font-weight:900; letter-spacing:0.1em; text-transform:uppercase; color:var(--red); display:flex; align-items:center; }
+  .totals-val { font-family:'Barlow Condensed',sans-serif; font-size:13px; font-weight:900; text-align:right; color:var(--text); display:flex; align-items:center; justify-content:flex-end; }
+
+  /* ── CHARTS ── */
+  .charts-pair { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:13px 11px 11px; }
+  .chart-full { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:14px; }
+  .chart-ttl { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
+  .chart-ttl-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .chart-ttl-row .chart-ttl { margin-bottom:0; }
+  .chart-ttl-badge {
+    font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:800;
+    letter-spacing:0.08em; text-transform:uppercase;
+    padding:3px 8px; border-radius:3px;
+  }
+  .legend { display:flex; flex-direction:column; gap:5px; margin-top:9px; }
+  .legend-item { display:flex; align-items:center; gap:6px; font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:600; color:var(--muted2); letter-spacing:0.04em; }
+  .legend-dot  { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+
+  /* ── BOTTOM NAV ── */
+  .bnav {
+    position:fixed; bottom:0; left:0; right:0;
+    background:var(--surface); border-top:1px solid var(--border);
+    display:grid; grid-template-columns:repeat(4,1fr);
+    padding:8px 0 max(10px,env(safe-area-inset-bottom));
+    z-index:200; box-shadow:0 -4px 20px rgba(0,0,0,0.4);
+  }
+  .bnav-item { display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; }
+  .bnav-icon { font-size:18px; line-height:1; }
+  .bnav-lbl  { font-family:'Barlow Condensed',sans-serif; font-size:9px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); }
+  .bnav-item.active .bnav-lbl { color:var(--red); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-left">
+    <img src="https://userimg-assets.customeriomail.com/images/client-env-117616/1719491779550_Screen%20Shot%202024-06-27%20at%207.35.51%20AM_01J1CV4Q25TNB8KBYYZKX9Z5ST.png" alt="NuBrakes logo" class="nb-logo">
+    <div class="hdr-divider"></div>
+    <span class="hdr-title">Channel Summary</span>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-month">March 2026</span>
+    <span class="hdr-updated">Data refreshes daily &nbsp;·&nbsp; Last updated: Mar 11</span>
+  </div>
+</header>
+
+<!-- CATEGORY NAV -->
+<div class="cat-nav">
+  <button class="cat-tab active" data-cat="all" onclick="setFilter('all',this)">
+    <span class="cat-tab-dot" style="background:#a8b0bf"></span>All
+  </button>
+  <button class="cat-tab" data-cat="Brand" onclick="setFilter('Brand',this)">
+    <span class="cat-tab-dot" style="background:#e8302a"></span>Brand
+  </button>
+  <button class="cat-tab" data-cat="Core" onclick="setFilter('Core',this)">
+    <span class="cat-tab-dot" style="background:#3d8ef8"></span>Core
+  </button>
+  <button class="cat-tab" data-cat="Referral" onclick="setFilter('Referral',this)">
+    <span class="cat-tab-dot" style="background:#22c97b"></span>Referral
+  </button>
+  <button class="cat-tab" data-cat="GBL" onclick="setFilter('GBL',this)">
+    <span class="cat-tab-dot" style="background:#f5a623"></span>GBL
+  </button>
+</div>
+
+<!-- CATEGORY SUMMARY STRIP -->
+<div class="cat-strip" id="cat-strip"></div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- MTD OVERVIEW -->
+  <div class="sec"><span class="sec-lbl">MTD Overview</span><div class="sec-line"></div></div>
+
+  <div class="hero">
+    <div class="hero-grid">
+      <div class="hero-cell">
+        <div class="hero-lbl">Leads</div>
+        <div class="hero-val" id="kpi-leads">—</div>
+        <div class="hero-sub">Proj: <span id="kpi-leads-proj">—</span></div>
+        <div class="micro-bar"><div class="micro-fill" id="bar-leads" style="background:var(--red);width:0%"></div></div>
+      </div>
+      <div class="hero-cell">
+        <div class="hero-lbl">Booked Jobs</div>
+        <div class="hero-val blue" id="kpi-booked">—</div>
+        <div class="hero-sub">Proj: <span id="kpi-booked-proj">—</span></div>
+        <div class="micro-bar"><div class="micro-fill" id="bar-booked" style="background:var(--blue);width:0%"></div></div>
+      </div>
+      <div class="hero-cell">
+        <div class="hero-lbl">Completed</div>
+        <div class="hero-val green" id="kpi-completed">—</div>
+        <div class="hero-sub">Proj: <span id="kpi-completed-proj">—</span></div>
+        <div class="micro-bar"><div class="micro-fill" id="bar-completed" style="background:var(--green);width:0%"></div></div>
+      </div>
+    </div>
+    <div class="hero-rev">
+      <div class="hero-rev-row">
+        <div>
+          <div class="hero-rev-lbl">Total Revenue (MTD)</div>
+          <div class="hero-rev-val" id="kpi-revenue">—</div>
+        </div>
+        <div style="text-align:right">
+          <div class="hero-rev-lbl">Projected EOM</div>
+          <div class="hero-rev-proj" id="kpi-revenue-proj">—</div>
+        </div>
+      </div>
+      <div class="progress-lbl">
+        <span>Month Progress</span>
+        <em id="day-progress-lbl">Day 11 of 31 — 35.5%</em>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="month-prog" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- CANCELED -->
+  <div class="canceled-strip">
+    <div>
+      <div class="cs-lbl">Canceled Jobs</div>
+      <div class="cs-val" id="kpi-canceled">—</div>
+    </div>
+    <div>
+      <div class="cs-proj-lbl">Projected EOM</div>
+      <div class="cs-proj-val" id="kpi-canceled-proj">—</div>
+    </div>
+  </div>
+
+  <!-- KEY RATES -->
+  <div class="sec"><span class="sec-lbl">Key Rates</span><div class="sec-line"></div></div>
+  <div class="rates">
+    <div class="rate-cell">
+      <div class="rate-lbl">Booking<br>Rate</div>
+      <div class="rate-val" id="rate-booking">—</div>
+    </div>
+    <div class="rate-cell">
+      <div class="rate-lbl">Cancel<br>Rate</div>
+      <div class="rate-val" id="rate-cancel">—</div>
+    </div>
+    <div class="rate-cell">
+      <div class="rate-lbl">Conv.<br>Rate</div>
+      <div class="rate-val" id="rate-conv">—</div>
+    </div>
+    <div class="rate-cell">
+      <div class="rate-lbl">Avg Order<br>Value</div>
+      <div class="rate-val" id="rate-aov" style="color:var(--gold)">—</div>
+    </div>
+  </div>
+
+  <!-- PACING -->
+  <div class="sec"><span class="sec-lbl">Month Pacing</span><div class="sec-line"></div></div>
+  <div class="pacing-card">
+    <div class="pacing-hdr">
+      <span class="pacing-title">MTD vs Projected EOM</span>
+      <span class="day-badge" id="day-badge">Day 11 / 31</span>
+    </div>
+    <div id="pacing-rows"></div>
+  </div>
+
+  <!-- CHANNEL TABLE -->
+  <div class="sec"><span class="sec-lbl">By Channel</span><div class="sec-line"></div></div>
+  <div class="tbl-card">
+    <div class="tbl-head">
+      <div class="th" style="text-align:left">Channel</div>
+      <div class="th">Leads</div>
+      <div class="th">Booked</div>
+      <div class="th">Done</div>
+      <div class="th">Revenue</div>
+    </div>
+    <div id="channel-rows"></div>
+    <div class="tbl-totals" id="totals-row"></div>
+  </div>
+
+  <!-- CHARTS PAIR -->
+  <div class="sec"><span class="sec-lbl">Leads &amp; Revenue by Category</span><div class="sec-line"></div></div>
+  <div class="charts-pair">
+    <div class="chart-card">
+      <div class="chart-ttl">Leads</div>
+      <canvas id="chart-leads" height="140"></canvas>
+      <div class="legend" id="legend-leads"></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-ttl">Revenue</div>
+      <canvas id="chart-revenue" height="140"></canvas>
+      <div class="legend" id="legend-revenue"></div>
+    </div>
+  </div>
+
+  <!-- BOOKING + CONVERSION RATE CHARTS SIDE BY SIDE -->
+  <div class="sec"><span class="sec-lbl">Booking &amp; Conversion Rate</span><div class="sec-line"></div></div>
+  <div class="charts-pair">
+    <div class="chart-card">
+      <div class="chart-ttl-row">
+        <div class="chart-ttl">Booking Rate</div>
+        <div class="chart-ttl-badge" style="background:rgba(61,142,248,0.15);color:#3d8ef8">Bkd ÷ Leads</div>
+      </div>
+      <canvas id="chart-booking" height="160"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-ttl-row">
+        <div class="chart-ttl">Conv. Rate</div>
+        <div class="chart-ttl-badge" style="background:rgba(34,201,123,0.15);color:#22c97b">Cmp ÷ Leads</div>
+      </div>
+      <canvas id="chart-conversion" height="160"></canvas>
+    </div>
+  </div>
+
+</main>
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <div class="bnav-item active"><span class="bnav-icon">📊</span><span class="bnav-lbl">Summary</span></div>
+  <div class="bnav-item"><span class="bnav-icon">📍</span><span class="bnav-lbl">Markets</span></div>
+  <div class="bnav-item"><span class="bnav-icon">🔧</span><span class="bnav-lbl">Channels</span></div>
+  <div class="bnav-item"><span class="bnav-icon">📅</span><span class="bnav-lbl">Daily</span></div>
+</nav>
+
+<script>
+/* ── DATA ──────────────────────────────────────────────────── */
+const RAW = [
+  {cat:"Brand",    channel:"VIOC BRAND EMAIL",      leads:1, booked:0, canceled:0, revenue:0,    completed:0},
+  {cat:"Brand",    channel:"VIOC BRAND SMS",         leads:1, booked:0, canceled:0, revenue:0,    completed:0},
+  {cat:"Core",     channel:"CORE ORGANIC",           leads:1, booked:0, canceled:0, revenue:0,    completed:0},
+  {cat:"Core",     channel:"CORE ORGANIC",           leads:1, booked:0, canceled:0, revenue:0,    completed:0},
+  {cat:"Core",     channel:"CORE ORGANIC",           leads:1, booked:0, canceled:0, revenue:0,    completed:0},
+  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:28,booked:5, canceled:0, revenue:3534, completed:9},
+  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:19,booked:3, canceled:0, revenue:242,  completed:1},
+  {cat:"Core",     channel:"CORE OPS ENTERED LEAD",  leads:2, booked:1, canceled:0, revenue:242,  completed:1},
+  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:10,booked:1, canceled:0, revenue:0,    completed:0},
+  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:14,booked:8, canceled:1, revenue:1277, completed:2},
+  {cat:"Core",     channel:"CORE OPS ENTERED LEAD",  leads:3, booked:3, canceled:0, revenue:206,  completed:1},
+  {cat:"Brand",    channel:"VIOC BRAND EMAIL",       leads:5, booked:1, canceled:0, revenue:0,    completed:0},
+  {cat:"Core",     channel:"CORE OPS ENTERED LEAD",  leads:1, booked:1, canceled:0, revenue:0,    completed:0},
+  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:9, booked:1, canceled:0, revenue:1860, completed:2},
+  {cat:"Referral", channel:"VIOC REFERRAL",          leads:2, booked:2, canceled:0, revenue:1349, completed:2},
+  {cat:"GBL",      channel:"VIOC PAID GMB",          leads:1, booked:0, canceled:0, revenue:688,  completed:1},
+  {cat:"Referral", channel:"VIOC REFERRAL",          leads:2, booked:1, canceled:0, revenue:443,  completed:1},
+  {cat:"GBL",      channel:"VIOC GMB",               leads:9, booked:1, canceled:0, revenue:0,    completed:0},
+  {cat:"GBL",      channel:"VIOC PAID GMB",          leads:1, booked:0, canceled:0, revenue:991,  completed:2},
+  {cat:"Brand",    channel:"VIOC BRAND EMAIL",       leads:8, booked:2, canceled:0, revenue:79,   completed:1},
+  {cat:"Brand",    channel:"VIOC BRAND EMAIL",       leads:5, booked:0, canceled:0, revenue:0,    completed:0},
+  {cat:"Core",     channel:"CORE ORGANIC",           leads:3, booked:1, canceled:0, revenue:475,  completed:1},
+  {cat:"Core",     channel:"CORE OPS ENTERED LEAD",  leads:3, booked:0, canceled:0, revenue:0,    completed:0},
+  {cat:"GBL",      channel:"VIOC GMB",               leads:8, booked:0, canceled:0, revenue:0,    completed:0},
+  {cat:"Core",     channel:"CORE GOOGLE ADS",        leads:2, booked:2, canceled:0, revenue:2544, completed:5},
+  {cat:"Core",     channel:"CORE OPS ENTERED LEAD",  leads:3, booked:2, canceled:1, revenue:79,   completed:1},
+  {cat:"Core",     channel:"CORE EMAIL",             leads:0, booked:1, canceled:0, revenue:0,    completed:0},
+  {cat:"Brand",    channel:"VIOC BRAND SMS",         leads:1, booked:1, canceled:0, revenue:79,   completed:1},
+  {cat:"Core",     channel:"CORE OTHERS",            leads:0, booked:0, canceled:0, revenue:0,    completed:0},
+  {cat:"Core",     channel:"CORE SMS",               leads:1, booked:0, canceled:0, revenue:943,  completed:1},
+  {cat:"Core",     channel:"CORE ORGANIC",           leads:3, booked:0, canceled:0, revenue:0,    completed:0},
+];
+
+const TODAY=11, DAYS=31, ELAPSED=TODAY/DAYS;
+const CC  = {Core:'#3d8ef8', Brand:'#e8302a', Referral:'#22c97b', GBL:'#f5a623'};
+const PP  = {Core:'pip-core', Brand:'pip-brand', Referral:'pip-referral', GBL:'pip-gbl'};
+const CATS = ['Brand','Core','Referral','GBL'];
+
+let filter='all', charts={};
+
+function setFilter(f, btn){
+  filter = f;
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  // sync cat-strip active state
+  document.querySelectorAll('.cat-strip-cell').forEach(c=>{
+    c.classList.toggle('active', c.dataset.cat===f);
+  });
+  render();
+}
+
+function renderCatStrip(){
+  const strip = document.getElementById('cat-strip');
+  strip.innerHTML = CATS.map(cat => {
+    const d = RAW.filter(r=>r.cat===cat);
+    const t = sum(d);
+    const bk = t.leads>0 ? ((t.booked/t.leads)*100).toFixed(0) : 0;
+    const cv = t.leads>0 ? ((t.completed/t.leads)*100).toFixed(0) : 0;
+    const col = CC[cat]||'#a8b0bf';
+    return `<div class="cat-strip-cell ${filter===cat?'active':''}" data-cat="${cat}"
+      style="--accent-cat:${col}"
+      onclick="setFilter('${cat}', document.querySelector('.cat-tab[data-cat=${cat}]'))">
+      <div class="csc-name" style="color:${col}">
+        <span class="csc-dot" style="background:${col}"></span>${cat}
+      </div>
+      <div class="csc-leads" style="color:${col}">${t.leads}</div>
+      <div class="csc-sub">${t.booked} booked · ${bk}%</div>
+      <div class="csc-sub">${t.completed} completed · ${cv}%</div>
+    </div>`;
+  }).join('');
+}
+
+const data   = ()=> filter==='all'?RAW:RAW.filter(r=>r.cat===filter);
+const sum    = d => d.reduce((a,r)=>({leads:a.leads+r.leads,booked:a.booked+r.booked,canceled:a.canceled+r.canceled,revenue:a.revenue+r.revenue,completed:a.completed+r.completed}),{leads:0,booked:0,canceled:0,revenue:0,completed:0});
+const pj     = v => Math.round(v/ELAPSED);
+const pct    = (n,d)=> d>0?((n/d)*100).toFixed(1):'0.0';
+const fmtK   = v => v>=1000?'$'+(v/1000).toFixed(1)+'k':'$'+Math.round(v);
+const set    = (id,v)=> document.getElementById(id).textContent=v;
+const grade  = (v,g,w)=> parseFloat(v)>=g?'good':parseFloat(v)>=w?'warn':'danger';
+const cGrade = v => parseFloat(v)<5?'good':parseFloat(v)<15?'warn':'danger';
+
+function render(){
+  const d=data(), t=sum(d);
+  const pLeads=pj(t.leads), pBooked=pj(t.booked), pComp=pj(t.completed), pRev=pj(t.revenue), pCan=pj(t.canceled);
+  const barW=(Math.min(100,ELAPSED*100)).toFixed(1);
+
+  set('kpi-leads',t.leads);        set('kpi-leads-proj',    pLeads);
+  set('kpi-booked',t.booked);      set('kpi-booked-proj',   pBooked);
+  set('kpi-completed',t.completed);set('kpi-completed-proj',pComp);
+  set('kpi-revenue',fmtK(t.revenue)); set('kpi-revenue-proj', fmtK(pRev));
+  set('kpi-canceled',t.canceled);  set('kpi-canceled-proj', pCan+' jobs');
+  set('day-progress-lbl',`Day ${TODAY} of ${DAYS} — ${barW}%`);
+  set('day-badge',`Day ${TODAY} / ${DAYS}`);
+
+  document.getElementById('month-prog').style.width=barW+'%';
+  ['bar-leads','bar-booked','bar-completed'].forEach(id=>document.getElementById(id).style.width=barW+'%');
+
+  const bk=pct(t.booked,t.leads), cn=pct(t.canceled,t.booked), cv=pct(t.completed,t.leads), aov=t.completed>0?Math.round(t.revenue/t.completed):0;
+  const sr=(id,v,cls)=>{const e=document.getElementById(id);e.textContent=v;e.className='rate-val '+cls;};
+  sr('rate-booking',bk+'%',grade(bk,30,15));
+  sr('rate-cancel', cn+'%',cGrade(cn));
+  sr('rate-conv',   cv+'%',grade(cv,20,10));
+  set('rate-aov','$'+aov);
+
+  const exp=Math.round(ELAPSED*100);
+  document.getElementById('pacing-rows').innerHTML=[
+    {lbl:'Leads',    mtd:t.leads,     proj:pLeads, col:'#e8302a'},
+    {lbl:'Booked',   mtd:t.booked,    proj:pBooked,col:'#3d8ef8'},
+    {lbl:'Completed',mtd:t.completed, proj:pComp,  col:'#22c97b'},
+    {lbl:'Revenue',  mtd:t.revenue,   proj:pRev,   col:'#f5a623',fmt:fmtK},
+    {lbl:'Canceled', mtd:t.canceled,  proj:pCan,   col:'#ff6b35'},
+  ].map(m=>{
+    const p=Math.min(100,Math.round(m.mtd/Math.max(1,m.proj)*100));
+    const fmt=m.fmt||(v=>v);
+    return `<div class="pace-row">
+      <div class="pace-name">${m.lbl}</div>
+      <div class="pace-track">
+        <div class="pace-fill" style="width:${p}%;background:${m.col}"></div>
+        <div class="pace-marker" style="left:${exp}%"></div>
+      </div>
+      <div class="pace-proj">${fmt(m.proj)}</div>
+    </div>`;
+  }).join('');
+
+  /* table — grouped by category when showing all */
+  const byCh={};
+  d.forEach(r=>{
+    if(!byCh[r.channel])byCh[r.channel]={cat:r.cat,leads:0,booked:0,canceled:0,revenue:0,completed:0};
+    const c=byCh[r.channel];c.leads+=r.leads;c.booked+=r.booked;c.canceled+=r.canceled;c.revenue+=r.revenue;c.completed+=r.completed;
+  });
+
+  let rowsHTML = '';
+  if(filter==='all'){
+    // Group rows by category in order: Brand, Core, Referral, GBL
+    CATS.forEach(cat=>{
+      const catEntries = Object.entries(byCh).filter(([,v])=>v.cat===cat).sort((a,b)=>b[1].leads-a[1].leads);
+      if(!catEntries.length) return;
+      const col = CC[cat]||'#a8b0bf';
+      rowsHTML += `<div class="tbl-cat-header" style="--cat-col:${col}">
+        <span class="tbl-cat-dot" style="background:${col}"></span>${cat}
+      </div>`;
+      rowsHTML += catEntries.map(([ch,v])=>`
+        <div class="tr">
+          <div class="td-name"><span class="cat-pip ${PP[v.cat]||''}"></span>${ch.replace(/^(CORE |VIOC )/,'')}</div>
+          <div class="td hi">${v.leads}</div>
+          <div class="td ${v.booked>0?'hi':''}">${v.booked}</div>
+          <div class="td ${v.completed>0?'green':''}">${v.completed}</div>
+          <div class="td ${v.revenue>0?'gold':''}">${fmtK(v.revenue)}</div>
+        </div>`).join('');
+    });
+  } else {
+    const sorted=Object.entries(byCh).sort((a,b)=>b[1].leads-a[1].leads);
+    rowsHTML = sorted.map(([ch,v])=>`
+      <div class="tr">
+        <div class="td-name"><span class="cat-pip ${PP[v.cat]||''}"></span>${ch.replace(/^(CORE |VIOC )/,'')}</div>
+        <div class="td hi">${v.leads}</div>
+        <div class="td ${v.booked>0?'hi':''}">${v.booked}</div>
+        <div class="td ${v.completed>0?'green':''}">${v.completed}</div>
+        <div class="td ${v.revenue>0?'gold':''}">${fmtK(v.revenue)}</div>
+      </div>`).join('');
+  }
+  document.getElementById('channel-rows').innerHTML = rowsHTML;
+
+  document.getElementById('totals-row').innerHTML=`
+    <div class="totals-lbl">TOTAL</div>
+    <div class="totals-val">${t.leads}</div>
+    <div class="totals-val">${t.booked}</div>
+    <div class="totals-val">${t.completed}</div>
+    <div class="totals-val">${fmtK(t.revenue)}</div>`;
+
+  renderCatStrip();
+  renderCharts(d);
+}
+
+function renderCharts(d){
+  Object.values(charts).forEach(c=>c.destroy()); charts={};
+
+  const cats={};
+  d.forEach(r=>{if(!cats[r.cat])cats[r.cat]={leads:0,rev:0};cats[r.cat].leads+=r.leads;cats[r.cat].rev+=r.revenue;});
+  // Use fixed order: Brand, Core, Referral, GBL — only include cats with data
+  const cl   = CATS.filter(c=>cats[c]);
+  const cv   = cl.map(c=>cats[c].leads);
+  const cr   = cl.map(c=>Math.round(cats[c].rev));
+  const cols = cl.map(c=>CC[c]||'#5c6478');
+
+  const dCfg=(labels,vals,cs)=>({
+    type:'doughnut',
+    data:{labels,datasets:[{data:vals,backgroundColor:cs,borderColor:'#13161b',borderWidth:3,hoverOffset:5}]},
+    options:{
+      responsive:true,cutout:'68%',
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'#1a1e26',borderColor:'#252b38',borderWidth:1,
+        titleFont:{family:'Barlow Condensed',size:12,weight:'700'},
+        bodyFont:{family:'Barlow',size:11},
+        callbacks:{label:ctx=>` ${ctx.label}: ${ctx.raw} (${pct(ctx.raw,vals.reduce((a,b)=>a+b,0))}%)`}
+      }},animation:{duration:600}
+    }
+  });
+
+  charts.leads  =new Chart(document.getElementById('chart-leads'),  dCfg(cl,cv,cols));
+  charts.revenue=new Chart(document.getElementById('chart-revenue'),dCfg(cl,cr,cols));
+
+  ['legend-leads','legend-revenue'].forEach(id=>{
+    document.getElementById(id).innerHTML=cl.map((c,i)=>`
+      <div class="legend-item"><div class="legend-dot" style="background:${cols[i]}"></div>${c}</div>`).join('');
+  });
+
+  // Aggregate by category in Brand, GBL, Core, Referral order
+  const CAT_ORDER = ['Brand','GBL','Core','Referral'];
+  const byCat={};
+  d.forEach(r=>{
+    if(!byCat[r.cat])byCat[r.cat]={leads:0,booked:0,completed:0,cat:r.cat};
+    byCat[r.cat].leads+=r.leads; byCat[r.cat].booked+=r.booked; byCat[r.cat].completed+=r.completed;
+  });
+  const catEnt = CAT_ORDER.filter(c=>byCat[c] && byCat[c].leads>0).map(c=>[c, byCat[c]]);
+
+  const barChartOpts = (ent, valFn) => ({
+    type:'bar',
+    data:{
+      labels: ent.map(([cat])=>cat),
+      datasets:[{
+        data: ent.map(([,v])=>valFn(v)),
+        backgroundColor: ent.map(([cat])=> CC[cat]||'#5c6478'),
+        borderRadius:5, borderSkipped:false
+      }]
+    },
+    options:{
+      indexAxis:'y', responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{
+          backgroundColor:'#1a1e26', borderColor:'#252b38', borderWidth:1,
+          titleFont:{family:'Barlow Condensed',size:12,weight:'700'},
+          callbacks:{label:ctx=>` ${ctx.raw}%`}
+        }
+      },
+      scales:{
+        x:{max:100, grid:{color:'#1f2430'}, ticks:{color:'#5c6478',font:{family:'Barlow Condensed',size:10},callback:v=>v+'%'}},
+        y:{grid:{color:'rgba(0,0,0,0)'}, ticks:{color:'#a8b0bf',font:{family:'Barlow Condensed',size:13,weight:'700'}}}
+      },
+      animation:{duration:600}
+    }
+  });
+
+  charts.booking = new Chart(document.getElementById('chart-booking'),
+    barChartOpts(catEnt, v=>parseFloat(pct(v.booked,v.leads)))
+  );
+
+  charts.conversion = new Chart(document.getElementById('chart-conversion'),
+    barChartOpts(catEnt, v=>parseFloat(pct(v.completed,v.leads)))
+  );
+}
+
+render();
+</script>
+</body>
+</html>
