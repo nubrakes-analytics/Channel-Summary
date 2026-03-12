@@ -643,9 +643,14 @@
 /* ── DATA ──────────────────────────────────────────────────── */
 let RAW = [];
 
-const now = new Date();
-const TODAY = now.getDate();
-const DAYS = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+const TZ = "America/Chicago";
+
+const cstNow = new Date(
+  new Date().toLocaleString("en-US", { timeZone: TZ })
+);
+
+const TODAY = cstNow.getDate();
+const DAYS = new Date(cstNow.getFullYear(), cstNow.getMonth() + 1, 0).getDate();
 const ELAPSED = TODAY / DAYS;
 
 const CC  = {Core:'#3d8ef8', Brand:'#e8302a', Referral:'#22c97b', GBL:'#f5a623'};
