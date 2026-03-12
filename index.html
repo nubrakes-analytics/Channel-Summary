@@ -252,8 +252,8 @@
 
   /* ── CHARTS ── */
   .charts-pair { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:13px 11px 11px; }
-  .chart-full { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:14px; }
+  .chart-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:13px 11px 11px; min-width:0; overflow:hidden; }
+  .chart-full { background:var(--surface); border:1px solid var(--border); border-radius:var(--r); padding:14px; min-width:0; overflow:hidden; }
   .chart-ttl { font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-bottom:10px; }
   .chart-ttl-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
   .chart-ttl-row .chart-ttl { margin-bottom:0; }
@@ -265,6 +265,19 @@
   .legend { display:flex; flex-direction:column; gap:5px; margin-top:9px; }
   .legend-item { display:flex; align-items:center; gap:6px; font-family:'Barlow Condensed',sans-serif; font-size:10px; font-weight:600; color:var(--muted2); letter-spacing:0.04em; }
   .legend-dot  { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  /* Prevent canvas from overflowing its container */
+  canvas { display:block; max-width:100% !important; width:100% !important; }
+  .chart-wrap { position:relative; width:100%; overflow:hidden; }
+  .chart-wrap-donut { height:130px; }
+  .chart-wrap-bar   { height:120px; }
+  @media (min-width:600px) {
+    .chart-wrap-donut { height:150px; }
+    .chart-wrap-bar   { height:130px; }
+  }
+  @media (min-width:1024px) {
+    .chart-wrap-donut { height:170px; }
+    .chart-wrap-bar   { height:140px; }
+  }
 
   .bnav {
     position:fixed; bottom:0; left:0; right:0;
@@ -588,12 +601,12 @@
   <div class="charts-pair">
     <div class="chart-card">
       <div class="chart-ttl">Leads</div>
-      <canvas id="chart-leads" height="140"></canvas>
+      <div class="chart-wrap chart-wrap-donut"><canvas id="chart-leads"></canvas></div>
       <div class="legend" id="legend-leads"></div>
     </div>
     <div class="chart-card">
       <div class="chart-ttl">Revenue</div>
-      <canvas id="chart-revenue" height="140"></canvas>
+      <div class="chart-wrap chart-wrap-donut"><canvas id="chart-revenue"></canvas></div>
       <div class="legend" id="legend-revenue"></div>
     </div>
   </div>
@@ -606,14 +619,14 @@
         <div class="chart-ttl">Booking Rate</div>
         <div class="chart-ttl-badge" style="background:rgba(61,142,248,0.15);color:#3d8ef8">Bkd ÷ Leads</div>
       </div>
-      <canvas id="chart-booking" height="160"></canvas>
+      <div class="chart-wrap chart-wrap-bar"><canvas id="chart-booking"></canvas></div>
     </div>
     <div class="chart-card">
       <div class="chart-ttl-row">
         <div class="chart-ttl">Conv. Rate</div>
         <div class="chart-ttl-badge" style="background:rgba(34,201,123,0.15);color:#22c97b">Cmp ÷ Leads</div>
       </div>
-      <canvas id="chart-conversion" height="160"></canvas>
+      <div class="chart-wrap chart-wrap-bar"><canvas id="chart-conversion"></canvas></div>
     </div>
   </div>
 
@@ -818,7 +831,7 @@ function renderCharts(d){
     type:'doughnut',
     data:{labels,datasets:[{data:vals,backgroundColor:cs,borderColor:'#13161b',borderWidth:3,hoverOffset:5}]},
     options:{
-      responsive:true,cutout:'68%',
+      responsive:true, maintainAspectRatio:false, cutout:'68%',
       plugins:{legend:{display:false},tooltip:{
         backgroundColor:'#1a1e26',borderColor:'#252b38',borderWidth:1,
         titleFont:{family:'Barlow Condensed',size:12,weight:'700'},
@@ -856,7 +869,7 @@ function renderCharts(d){
       }]
     },
     options:{
-      indexAxis:'y', responsive:true,
+      indexAxis:'y', responsive:true, maintainAspectRatio:false,
       plugins:{
         legend:{display:false},
         tooltip:{
